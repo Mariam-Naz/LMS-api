@@ -24,29 +24,35 @@ use App\Http\Controllers\API\CoursePackageController;
 // });
 
 /** LOGIN REGISTRATION API **/
-Route::post('login', [UserController::class, 'login']);
+Route::match(['get','post'],'login', [UserController::class, 'login'])->name('login');
 Route::post('register',[UserController::class, 'register']);
 Route::group(['middleware' => ['auth:api']], function () {
     /** Course routes **/
     Route::get('courses', [CourseController::class, 'index']);
-    Route::get('course/{id}', [CourseController::class, 'show']);
-    Route::post('course/create', [CourseController::class, 'create']);
-    Route::patch('course/{id}', [CourseController::class, 'update']);
-    Route::delete('course/{id}', [CourseController::class, 'delete']);
 
     /** Package routes **/
     Route::get('packages', [PackageController::class, 'index']);
-    Route::get('package/{id}', [PackageController::class, 'show']);
-    Route::post('package/create', [PackageController::class, 'create']);
-    Route::patch('package/{id}', [PackageController::class, 'update']);
-    Route::delete('package/{id}', [PackageController::class, 'delete']);
+
 
     /** CoursePackages routes **/
-    Route::get('coursePackage/create', [CoursePackageController::class, 'create'])->name('createPackage');
-    Route::get('coursePackage/update', [CoursePackageController::class, 'update'])->name('updatePackage');
-
-    Route::get('coursePackage/{id}', [CoursePackageController::class, 'show']);
-    Route::delete('coursePackage/{id}', [CoursePackageController::class, 'delete']);
-
+    Route::get('coursePackages', [CoursePackageController::class, 'index']);
 });
+Route::group(
+    ['middleware' =>['auth:api', 'roleVerified:admin']],
+    function () {
+Route::get('course/{id}', [CourseController::class, 'show']);
+Route::post('course/create', [CourseController::class, 'create']);
+Route::patch('course/{id}', [CourseController::class, 'update']);
+Route::delete('course/{id}', [CourseController::class, 'delete']);
 
+Route::get('package/{id}', [PackageController::class, 'show']);
+Route::post('package/create', [PackageController::class, 'create']);
+Route::patch('package/{id}', [PackageController::class, 'update']);
+Route::delete('package/{id}', [PackageController::class, 'delete']);
+
+Route::post('coursePackage/create', [CoursePackageController::class, 'create']);
+Route::patch('coursePackage/{id}', [CoursePackageController::class, 'update']);
+Route::get('coursePackage/{id}', [CoursePackageController::class, 'show']);
+Route::delete('coursePackage/{id}', [CoursePackageController::class, 'delete']);
+    }
+);

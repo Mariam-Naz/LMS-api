@@ -26,9 +26,8 @@ class UserController extends Controller
             return self::failure($validator->errors()->first());
         }
 
-        // $user = User::where('email', $request->email)->where('id', '!=', 1)->first();
-        if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
-            $user = Auth::user();
+        $user = User::where('email', $request->email)->where('id', '!=', 1)->first();
+        if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Client password')->accessToken;
                 $user = new UserResource($user);

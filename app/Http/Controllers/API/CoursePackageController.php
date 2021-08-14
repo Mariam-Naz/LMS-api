@@ -13,78 +13,84 @@ use Illuminate\Support\Facades\Response;
 class CoursePackageController extends Controller
 {
 
+    /** Display a listing of CoursePackages **/
+    public function index()
+    {
+        $coursePackage = CoursePackage::all()->sortBy('id');
+        return CoursePackageResource::collection($coursePackage);
+    }
+
     /** Create a CoursePackage **/
     public function create(Request $request)
     {
         $data = $request->all();
         $validator = Validator::make($data, [
-            'package_id' => 'required|integer'
+            'package_id' => 'required|integer',
+            'course_id' => 'required|integer'
         ]);
-
         if ($validator->fails()) {
             return self::failure($validator->errors()->first());
         }
-        $response = array();
-        foreach($data['course_id'] as $course){
-            $coursePackage = new CoursePackage();
-            $coursePackage->course_id=$course;
-            $coursePackage->package_id = $data['package_id'];
-            $coursePackage->save();
-            $coursePackage = new CoursePackageResource($coursePackage);
-            array_push($response,['coursePackage' => $coursePackage]);
-        }
-        $responsePackage = Package::find($data['package_id']);
-        return self::success("Course-Package is created Successfully", ['packageData' => $responsePackage, 'coursePackage'=>$response]);
+        $coursePackage = new CoursePackage($data);
+        $coursePackage->save();
+        $coursePackage = new CoursePackageResource($coursePackage);
+        $response=['coursePackage' => $coursePackage];
+        return self::success("Course-Package is created Successfully", ['data'=>$response]);
     }
 
     /** show a specific CoursePackage **/
     public function show($id)
     {
-        $package = CoursePackage::find($id);
+        $coursePackage = CoursePackage::find($id);
 
-        if (!$package) {
+        if (!$coursePackage) {
             return response()->json([
                 'message' => 'Could not find the course-Package',
                 'code' => 404
             ], 404);
         }
-        return new CoursePackageResource($package);
+        return new CoursePackageResource($coursePackage);
     }
 
     /** Update the specified CoursePackage **/
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $data = $request->all();
-        $response = array();
-        $ids = CoursePackage::where(['package_id' => $data['package_id']])->pluck('id');
-        // echo gettype($data['course_id']);die;
-        $idCourseArray = array_combine($ids,$data['course_id']);
+        $coursePackage = CoursePackage::find($id);
 
-        foreach ($idCourseArray as $id=>$course) {
-            // echo 'id:'.$id.'course:'.$course;die;
-            $coursePackage = CoursePackage::where(['id'=>$id])->update(['course_id'=>$course]);
-            $coursePackage = new CoursePackageResource($coursePackage);
-            array_push($response, ['coursePackage' => $coursePackage]);
+        if (!$coursePackage) {
+            return response()->json([
+                'message' => 'Could not find the coursePackage',
+                'code' => 404
+            ], 404);
         }
-        $responsePackage = Package::find($data['package_id']);
-        return self::success("Course-Package is created Successfully", ['packageData' => $responsePackage, 'coursePackage' => $response]);
+
+        $validator = $this->validator_update($data);
+        if ($validator->fails()) {
+            return self::failure($validator->errors()->first());
+        }
+        if ($coursePackage->update($data)) {
+            $coursePackage = new CoursePackageResource($coursePackage);
+            $response = ['coursePackage' => $coursePackage];
+            return self::success("coursePackage is updated Successfully", ['data' => $response]);
+        }
     }
 
     /** Remove the specified CoursePackage **/
     public function delete($id)
     {
-        $package = CoursePackage::find($id);
+        $coursePackage = CoursePackage::find($id);
 
-        if (!$package) {
+        if (!$coursePackage) {
             return response()->json([
                 'message' => 'Could not find the course-Package',
                 'code' => 404
             ], 404);
         }
 
-        if ($package->delete()) {
+        if ($coursePackage->delete()) {
             return response()->json([
-                'message' => 'Package deleted successsfully',
+                'message' => 'coursePackage deleted successsfully',
                 'code' => 204
             ], 204);
         } else {
@@ -93,6 +99,23 @@ class CoursePackageController extends Controller
                 'code' => 500,
             ], 500);
         }
+    }
+
+    /** Validator update **/
+    private function validator_update($data)
+    {
+        $rules = array();
+
+        if (array_key_exists('course_id', $data)) {
+            $rules['course_id'] = 'required|integer';
+        }
+        if (array_key_exists('package_id', $data)) {
+            $rules['package_id'] = 'required|integer';
+        }
+        return Validator::make(
+            $data,
+            $rules
+        );
     }
 
 }

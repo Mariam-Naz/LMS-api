@@ -32,14 +32,11 @@ class PackageController extends Controller
         if ($validator->fails()) {
             return self::failure($validator->errors()->first());
         }
-
-        $package = new Package();
-        $package->name = $data['name'];
-        $package->price = $data['price'];
-        $package->discount_percentage = $data['discount_percentage'];
+        $package = new Package($data);
         $package->save();
         $package = new PackageResource($package);
-        return redirect()->route('createPackage', ['course_id' => $data['courses'], 'package_id' => $package->id]);
+        $response = ['package' => $package];
+        return self::success("Package is created Successfully", ['data' => $response]);
     }
 
     /** show a specific Package **/
@@ -73,9 +70,11 @@ class PackageController extends Controller
         if ($validator->fails()) {
             return self::failure($validator->errors()->first());
         }
-        $package->update(['name'=>$data['name'], 'price'=>$data['price'], 'discount_percentage'=>$data['discount_percentage']]);
-        $package = new PackageResource($package);
-        return redirect()->route('updatePackage', ['course_id' => $data['courses'], 'package_id' => $id]);
+        if($package->update($data)){
+            $package = new PackageResource($package);
+            $response = ['package' => $package];
+            return self::success("Package is updated Successfully", ['data' => $response]);
+        }
     }
 
     /** Remove the specified Package **/
