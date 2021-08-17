@@ -71,15 +71,44 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $data = $request->all();
-        $user = Auth::user();
-        if ($user) {
-            $user->update($data);
-            $profile = User::where('id', $user->id)->first();
-            $profile = new UserResource($profile);
-            return self::success("User Profile", ['data' => $profile]);
-        } else {
-            return self::failure("No User(s) Exist");
+        $getUser = Auth::user();
+        $user = User::find($getUser->id);
+        if (!$user) {
+            return response()->json([
+                'message' => 'Could not find the user',
+                'code' => 404
+            ], 404);
         }
+
+        $validator = $this->validator_update($data);
+        if ($validator->fails()) {
+            return self::failure($validator->errors()->first());
+        }
+        if ($user->update($data)) {
+            $user = new UserResource($user);
+            $response = ['user' => $user];
+            return self::success("User Profile", ['data' => $response]);
+        }
+    }
+
+    /** Validator update **/
+    private function validator_update($data)
+    {
+        $rules = array();
+
+        if (array_key_exists('name', $data)) {
+            $rules['name'] = 'required|string';
+        }
+        if (array_key_exists('email', $data)) {
+            $rules['email'] = 'required|string';
+        }
+        if (array_key_exists('role_id', $data)) {
+            $rules['role_id'] = 'integer';
+        }
+        return Validator::make(
+            $data,
+            $rules
+        );
     }
 
 }
