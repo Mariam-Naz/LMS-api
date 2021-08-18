@@ -62,7 +62,7 @@ class CourseController extends Controller
 
         if (!$course) {
             return response()->json([
-                'message' => 'Could not find the company Wallet',
+                'message' => 'Could not find the Course',
                 'code' => 404
             ], 404);
         }

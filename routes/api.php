@@ -12,6 +12,8 @@ use App\Http\Controllers\API\PackagePrerequisiteController;
 use App\Http\Controllers\API\AccountDetailController;
 use App\Http\Controllers\API\ClassesController;
 use App\Http\Controllers\API\EnrollController;
+use App\Http\Controllers\API\CartController;
+use App\Http\Controllers\API\TransactionController;
 
 
 /*
@@ -51,6 +53,18 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::post('enroll/create', [EnrollController::class, 'create']);
     Route::patch('enroll/{id}', [EnrollController::class, 'update']);
     Route::delete('enroll/{id}', [EnrollController::class, 'delete']);
+    /** Cart routes **/
+    Route::get('carts', [CartController::class, 'index']);
+    Route::get('cart/{id}', [CartController::class, 'show']);
+    Route::post('cart/create', [CartController::class, 'create']);
+    Route::patch('cart/{id}', [CartController::class, 'update']);
+    Route::delete('cart/{id}', [CartController::class, 'delete']);
+    /** Transaction routes **/
+    Route::get('transactions', [TransactionController::class, 'index']);
+    Route::get('transaction/{id}', [TransactionController::class, 'show']);
+    Route::post('transaction/create', [TransactionController::class, 'create']);
+    Route::patch('transaction/{id}', [TransactionController::class, 'update']);
+    Route::delete('transaction/{id}', [TransactionController::class, 'delete']);
 
 });
 // Route::group(['middleware' =>['auth:api', 'roleVerified:admin']],function () {

@@ -37,7 +37,6 @@ class EnrollController extends Controller
         $data = $request->all();
         $validator = Validator::make($data, [
             'user_id' => 'required|integer',
-            'package_id' => 'required|integer',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'date_range' => 'required|string',
@@ -50,14 +49,25 @@ class EnrollController extends Controller
 
         $enroll = new Enroll($data);
         $enroll->save();
-        $packageId = $enroll->package_id;
-        $coursesIds = CoursePackage::where(['package_id'=>$packageId])->pluck('course_id');
-       foreach($coursesIds as $course){
-           $enrollCourse = new EnrollCourse();
-           $enrollCourse->enroll_id = $enroll->id;
-           $enrollCourse->course_id = $course;
-           $enrollCourse->save();
-       }
+        if($enroll->package_id != null){
+                $packageId = $enroll->package_id;
+                $coursesIds = CoursePackage::where(['package_id'=>$packageId])->pluck('course_id');
+            foreach($coursesIds as $course){
+                $enrollCourse = new EnrollCourse();
+                $enrollCourse->enroll_id = $enroll->id;
+                $enrollCourse->course_id = $course;
+                $enrollCourse->save();
+            }
+        }else{
+            $coursesIds = $data['courses'];
+            foreach ($coursesIds as $course) {
+                $enrollCourse = new EnrollCourse();
+                $enrollCourse->enroll_id = $enroll->id;
+                $enrollCourse->course_id = $course;
+                $enrollCourse->save();
+            }
+        }
+
        $enroll->courses = array($coursesIds);
         $enroll = new EnrollResource($enroll);
         $response = ['enroll' => $enroll];
@@ -98,14 +108,14 @@ class EnrollController extends Controller
             return self::failure($validator->errors()->first());
         }
         if ($enroll->update($data)) {
-            $packageId = $enroll->package_id;
-            $coursesIds = CoursePackage::where(['package_id' => $packageId])->pluck('course_id');
-            foreach ($coursesIds as $course) {
-                $enrollCourse = new EnrollCourse();
-                $enrollCourse->enroll_id = $enroll->id;
-                $enrollCourse->course_id = $course;
-                $enrollCourse->save();
-            }
+                $packageId = $enroll->package_id;
+                $coursesIds = CoursePackage::where(['package_id' => $packageId])->pluck('course_id');
+                foreach ($coursesIds as $course) {
+                    $enrollCourse = new EnrollCourse();
+                    $enrollCourse->enroll_id = $enroll->id;
+                    $enrollCourse->course_id = $course;
+                    $enrollCourse->save();
+                }
             $enroll->courses = array($coursesIds);
             $enroll = new EnrollResource($enroll);
             $response = ['enroll' => $enroll];
@@ -145,9 +155,6 @@ class EnrollController extends Controller
 
         if (array_key_exists('user_id', $data)) {
             $rules['user_id'] = 'required|integer';
-        }
-        if (array_key_exists('package_id', $data)) {
-            $rules['package_id'] = 'required|integer';
         }
         if (array_key_exists('start_date', $data)) {
             $rules['start_date'] = 'required|date';
