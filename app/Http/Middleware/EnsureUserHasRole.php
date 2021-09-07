@@ -18,7 +18,7 @@ class EnsureUserHasRole
     public function handle(Request $request, Closure $next, $role)
     {
         $user = Auth::user();
-        if($user->Role->name != $role) {
+        if($user->Role->name != $role && $user->Role->name != 'admin') {
             $response = [
                 'status' => 2,
                 'message' => 'Unauthorized',

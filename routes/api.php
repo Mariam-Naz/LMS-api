@@ -14,6 +14,10 @@ use App\Http\Controllers\API\ClassesController;
 use App\Http\Controllers\API\EnrollController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\TransactionController;
+use App\Http\Controllers\API\ClassStudentController;
+use App\Http\Controllers\API\ClassSessionController;
+use App\Http\Controllers\API\ScheduleHourController;
+use App\Http\Controllers\API\ScheduleController;
 
 
 /*
@@ -65,9 +69,15 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::post('transaction/create', [TransactionController::class, 'create']);
     Route::patch('transaction/{id}', [TransactionController::class, 'update']);
     Route::delete('transaction/{id}', [TransactionController::class, 'delete']);
+    /** ClassStudent routes **/
+    Route::get('class-students', [ClassStudentController::class, 'index']);
+    Route::get('class-student/{id}', [ClassStudentController::class, 'show']);
+    Route::post('class-student/create', [ClassStudentController::class, 'create']);
+    Route::patch('class-student/{id}', [ClassStudentController::class, 'update']);
+    Route::delete('class-student/{id}', [ClassStudentController::class, 'delete']);
 
 });
-// Route::group(['middleware' =>['auth:api', 'roleVerified:admin']],function () {
+Route::group(['middleware' =>['auth:api', 'roleVerified:admin']],function () {
         /** Course routes **/
         Route::get('course/{id}', [CourseController::class, 'show']);
         Route::post('course/create', [CourseController::class, 'create']);
@@ -107,8 +117,8 @@ Route::group(['middleware' => ['auth:api']], function () {
         Route::post('classes/create', [ClassesController::class, 'create']);
         Route::patch('classes/{id}', [ClassesController::class, 'update']);
         Route::delete('classes/{id}', [ClassesController::class, 'delete']);
-//     }
-// );
+    }
+);
 
 Route::group(['middleware' =>['auth:api', 'roleVerified:teacher']],function () {
 
@@ -118,5 +128,27 @@ Route::group(['middleware' =>['auth:api', 'roleVerified:teacher']],function () {
         Route::post('classes/create', [ClassesController::class, 'create']);
         Route::patch('classes/{id}', [ClassesController::class, 'update']);
         Route::delete('classes/{id}', [ClassesController::class, 'delete']);
+
+        /** ClassSession routes **/
+        Route::get('class-sessions', [ClassSessionController::class, 'index']);
+        Route::get('class-session/{id}', [ClassSessionController::class, 'show']);
+        Route::post('class-session/create', [ClassSessionController::class, 'create']);
+        Route::patch('class-session/{id}', [ClassSessionController::class, 'update']);
+        Route::delete('class-session/{id}', [ClassSessionController::class, 'delete']);
+
+        /** Schedule routes **/
+        Route::get('schedules', [ScheduleController::class, 'index']);
+        Route::get('schedule/{id}', [ScheduleController::class, 'show']);
+        Route::post('schedule/create', [ScheduleController::class, 'create']);
+        Route::patch('schedule/{id}', [ScheduleController::class, 'update']);
+        Route::delete('schedule/{id}', [ScheduleController::class, 'delete']);
+
+        /** ScheduleHour routes **/
+        Route::get('schedule-hours', [ScheduleHourController::class, 'index']);
+        Route::get('schedule-hour/{id}', [ScheduleHourController::class, 'show']);
+        Route::post('schedule-hour/create', [ScheduleHourController::class, 'create']);
+        Route::patch('schedule-hour/{id}', [ScheduleHourController::class, 'update']);
+        Route::delete('schedule-hour/{id}', [ScheduleHourController::class, 'delete']);
+
     }
 );
